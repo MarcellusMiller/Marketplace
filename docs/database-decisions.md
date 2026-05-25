@@ -35,11 +35,12 @@ Migrations:
 $table->ulid('id')->primary();  
 ```
   
-Aplicar ULID em:  
+Aplicar ULID em tabelas principais da aplicação:  
   
 ```txt  
 users  
 roles  
+permissions
 products  
 categories  
 product_images  
@@ -53,6 +54,8 @@ conversations
 messages  
 reviews  
 ```
+
+Tabelas pivô do Spatie Permission, como `model_has_roles`, seguem a estrutura esperada pelo pacote e não precisam de chave primária própria.
 
 -----------------
 
@@ -89,7 +92,7 @@ $table->softDeletes();
   
 ### Decisão  
   
-Usar tabela `roles` + tabela pivô `role_user`.  
+Usar Spatie Permission para gerenciar roles e permissões.  
   
 ### Motivo  
   
@@ -102,12 +105,15 @@ buyer + seller
 admin  
 ```  
   
-### Estrutura  
+### Estrutura principal  
   
 ```txt  
 users  
 roles  
-role_user  
+permissions
+model_has_roles
+model_has_permissions
+role_has_permissions
 ```  
   
 Roles iniciais:  
@@ -117,6 +123,8 @@ buyer
 seller  
 admin  
 ```  
+
+No MVP, as roles principais serão `buyer`, `seller` e `admin`. Permissões granulares podem ser adicionadas conforme as policies e fluxos administrativos evoluírem.
   
 ---  
   
@@ -455,8 +463,10 @@ R$ 59,90
   
 ```txt  
 price_cents  
+unit_price_cents
 subtotal_cents  
 shipping_total_cents  
+shipping_cost_cents
 total_cents  
 amount_cents  
 ```  
@@ -522,7 +532,7 @@ reviews.product_id
   
 ```txt  
 Primary Key: ULID  
-Roles: roles + role_user  
+Roles: Spatie Permission  
 Status: Laravel Enums  
 Money: centavos  
 Cart: 1 ativo por buyer  

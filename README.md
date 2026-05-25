@@ -9,7 +9,7 @@ Real-time messaging, OAuth authentication, payments, shipping workflow, relation
 ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![MySQL/Postgres](https://img.shields.io/badge/Database-SQL-blue?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 
 </div>
 
@@ -42,6 +42,7 @@ The project focuses on demonstrating backend engineering skills using Laravel, i
 - Login / Logout
 - OAuth Authentication (Google / GitHub)
 - Multi-role users
+- Spatie Permission roles
 - Protected API routes
 - Ownership authorization
 
@@ -90,18 +91,19 @@ The project focuses on demonstrating backend engineering skills using Laravel, i
 
 ### Backend
 
-- Laravel
-- PHP
+- Laravel 12
+- PHP 8.5+
 - REST API
 - Laravel Sanctum
 - Laravel Socialite
+- Spatie Permission
 - Laravel Reverb / WebSockets
 - Queues
 - Docker
 
 ### Database
 
-- MySQL / PostgreSQL
+- PostgreSQL / Supabase
 - ULID Primary Keys
 - Relational Database Modeling
 - Soft Deletes
@@ -181,9 +183,9 @@ Planning & Architecture
 
 Roadmap:
 
-- [*] Documentation
-- [*] Database Modeling
-- [*] Laravel Setup
+- [x] Documentation
+- [x] Database Modeling
+- [x] Laravel Setup
 - [ ] Authentication
 - [ ] Products
 - [ ] Cart
@@ -268,6 +270,5 @@ https://www.linkedin.com/in/marcellusmiller/
 ```
 
 ---
-
 
 
