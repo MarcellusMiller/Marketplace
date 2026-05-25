@@ -1,0 +1,29 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+ USERS ||--o{ PRODUCTS : owns
+ USERS ||--o{ ORDERS : places
+ USERS ||--|| CARTS : has
+ USERS }o--o{ ROLES : has
+
+ CATEGORIES ||--o{ PRODUCTS : contains
+
+ PRODUCTS ||--o{ PRODUCT_IMAGES : has
+ PRODUCTS ||--o{ CART_ITEMS : appears_in
+ PRODUCTS ||--o{ ORDER_ITEMS : appears_in
+ PRODUCTS ||--o{ REVIEWS : receives
+
+ CARTS ||--o{ CART_ITEMS : contains
+
+ ORDERS ||--o{ ORDER_ITEMS : contains
+ ORDERS ||--|| PAYMENTS : has
+ ORDERS ||--|| SHIPMENTS : has
+ ORDERS ||--|| CONVERSATIONS : enables
+ ORDERS ||--o{ REVIEWS : generates
+
+ CONVERSATIONS ||--o{ MESSAGES : contains
+
+ USERS ||--o{ REVIEWS : writes
+ USERS ||--o{ MESSAGES : sends
