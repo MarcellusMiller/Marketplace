@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(ListProductsAction $action)
+    public function index(Request $request, ListProductsAction $action)
     {
-        $products = $action->execute();
+        $products = $action->execute($request->query("category"));
 
         return ProductResource::collection($products);
     }

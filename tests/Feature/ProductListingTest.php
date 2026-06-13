@@ -3,6 +3,7 @@
 use App\Enums\ProductStatus;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -61,4 +62,38 @@ it("lists active products with pagination data", function () {
         ->assertJsonPath("data.0.id", $activeProduct->id)
         ->assertJsonPath("data.0.status", "active")
         ->assertJsonPath("data.0.main_image", "https://example.com/products/test-product.jpg");
+});
+
+it("filters products by category", function () {
+    $categoryA = Category::factory()->create([
+        "name" => "Category A",
+        "slug" => "category-a",
+    ]);
+
+    $categoryB = Category::factory()->create([
+        "name" => "Category B",
+        "slug" => "category-b",
+    ]);
+
+    $productA = Product::factory()->create([
+        "name" => "Product A",
+        "slug" => "product-a",
+        "status" => ProductStatus::Active,
+        "category_id" => $categoryA->id,
+    ]);
+
+    Product::factory()->create([
+        "name" => "Product B",
+        "slug" => "product-b",
+        "status" => ProductStatus::Active,
+        "category_id" => $categoryB->id,
+    ]);
+
+    $response = $this->getJson("/api/products?category=category-a");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $productA->id)
+        ->assertJsonPath("data.0.category.slug", "category-a");
 });

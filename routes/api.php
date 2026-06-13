@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProductController;
 
 Route::post("register", [RegisterController::class, "store"]);
 Route::post("login", [LoginController::class, "store"]);
@@ -14,4 +15,4 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get("me", [MeController::class, "show"]);
 });
 
-Route::get("products", [\App\Http\Controllers\Api\ProductController::class, "index"]);
+Route::get("products", [ProductController::class, "index"]);
