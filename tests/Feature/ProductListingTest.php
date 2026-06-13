@@ -97,3 +97,45 @@ it("filters products by category", function () {
         ->assertJsonPath("data.0.id", $productA->id)
         ->assertJsonPath("data.0.category.slug", "category-a");
 });
+
+it("filters products by search term", function () {
+    $matchingProduct = Product::factory()->create([
+        "name" => "Notebook Gamer",
+        "description" => "High performance product",
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "name" => "Office Chair",
+        "description" => "Comfortable chair",
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?search=notebook");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $matchingProduct->id);
+});
+
+it("filters products by description search term", function () {
+    $matchingProduct = Product::factory()->create([
+        "name" => "Generic Product",
+        "description" => "Contains the word ergonomic",
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "name" => "Another Product",
+        "description" => "Does not match",
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?search=ergonomic");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $matchingProduct->id);
+});

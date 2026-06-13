@@ -11,7 +11,10 @@ class ProductController extends Controller
 {
     public function index(Request $request, ListProductsAction $action)
     {
-        $products = $action->execute($request->query("category"));
+        $products = $action->execute(
+            category : $request->query("category"),
+            search : $request->query("search")
+        );
 
         return ProductResource::collection($products);
     }
