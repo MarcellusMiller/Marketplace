@@ -13,7 +13,9 @@ class ProductController extends Controller
     {
         $products = $action->execute(
             category : $request->query("category"),
-            search : $request->query("search")
+            search: $request->query("search"),
+            minPrice: $request->has("min_price") ? $request->integer("min_price") : null,
+            maxPrice: $request->has("max_price") ? $request->integer("max_price") : null,
         );
 
         return ProductResource::collection($products);

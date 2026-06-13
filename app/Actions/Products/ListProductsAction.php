@@ -8,7 +8,11 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ListProductsAction
 {
-    public function execute(?string $category = null, ?string $search = null): LengthAwarePaginator
+    public function execute(
+        ?string $category = null,
+        ?string $search = null,
+        ?int $minPrice = null,
+        ?int $maxPrice = null): LengthAwarePaginator
     {
         return Product::query()
             ->with(["category", "seller", "images"])
@@ -23,6 +27,12 @@ class ListProductsAction
                     $query->where("name", "like", "%{$search}%")
                         ->orWhere("description", "like", "%{$search}%");
                 });
+            })
+            ->when($minPrice !== null, function ($query) use ($minPrice) {
+                $query->where("price_cents", ">=", $minPrice);
+            })
+            ->when($maxPrice !== null, function ($query) use ($maxPrice) {
+                $query->where("price_cents", "<=", $maxPrice);
             })
             ->latest()
             ->paginate(15);

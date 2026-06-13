@@ -139,3 +139,65 @@ it("filters products by description search term", function () {
         ->assertJsonCount(1, "data")
         ->assertJsonPath("data.0.id", $matchingProduct->id);
 });
+
+it("filters products by minimum price", function () {
+    $matchingProduct = Product::factory()->create([
+        "price_cents" => 5000,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 900,
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?min_price=1000");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $matchingProduct->id);
+});
+
+it("filters products by maximum price", function () {
+    $matchingProduct = Product::factory()->create([
+        "price_cents" => 900,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 5000,
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?max_price=1000");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $matchingProduct->id);
+});
+
+it("filters products by price range", function () {
+    $matchingProduct = Product::factory()->create([
+        "price_cents" => 2500,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 900,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 5000,
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?min_price=1000&max_price=3000");
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, "data")
+        ->assertJsonPath("data.0.id", $matchingProduct->id);
+});
