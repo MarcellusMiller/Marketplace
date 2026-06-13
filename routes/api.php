@@ -13,3 +13,5 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post("logout", [LogoutController::class, "destroy"]);
     Route::get("me", [MeController::class, "show"]);
 });
+
+Route::get("products", [\App\Http\Controllers\Api\ProductController::class, "index"]);

@@ -12,9 +12,13 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Product::query()->exists()) {
+            return;
+        }
+
         $seller = User::role("seller")->first();
 
-        if(! $seller) {
+        if (! $seller) {
             return;
         }
 

@@ -13,30 +13,34 @@ class DevelopmentUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $buyer = User::factory()->create([
-            "name" => "Marcellus buyer",
-            "email" => "buyer@example.com",
-            "password" => "password123",
-            
-        ]);
+        $buyer = User::updateOrCreate(
+            ['email' => 'buyer@example.com'],
+            [
+                'name' => 'Marcellus buyer',
+                'password' => 'password123',
+            ]
+        );
 
-        $buyer->assignRole("buyer");
+        $buyer->assignRole('buyer');
 
-        $seller = User::factory()->create([
-            "name" => "Marcellus seller",
-            "email" => "seller@example.com",
-            "password" => "password123",
-            
-        ]);
+        $seller = User::updateOrCreate(
+            ['email' => 'seller@example.com'],
+            [
+                'name' => 'Marcellus seller',
+                'password' => 'password123',
+            ]
+        );
 
-        $seller->assignRole("seller");
+        $seller->assignRole('seller');
 
-        $admin = User::factory()->create([
-            "name" => "Marcellus admin",
-            "email" => "admin@example.com",
-            "password" => "password123",
-        ]);
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Marcellus admin',
+                'password' => 'password123',
+            ]
+        );
 
-        $admin->assignRole("admin");
+        $admin->assignRole('admin');
     }
 }
