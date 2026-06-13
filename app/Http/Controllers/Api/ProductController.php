@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Products\ListProductsAction;
 use App\Http\Resources\ProductResource;
+use App\Actions\Products\ListSingleProductAction;
+use App\Http\Resources\ProductDetailResource;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -20,5 +23,12 @@ class ProductController extends Controller
         );
 
         return ProductResource::collection($products);
+    }
+
+    public function show(Product $product, ListSingleProductAction $action) 
+    {
+        $product = $action->execute($product);
+
+        return new ProductDetailResource($product);
     }
 }
