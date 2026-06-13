@@ -12,9 +12,10 @@ class ListProductsAction
         ?string $category = null,
         ?string $search = null,
         ?int $minPrice = null,
-        ?int $maxPrice = null): LengthAwarePaginator
-    {
-        return Product::query()
+        ?int $maxPrice = null,
+        ?string $sort = null,
+    ): LengthAwarePaginator {
+        $query = Product::query()
             ->with(["category", "seller", "images"])
             ->where("status", ProductStatus::Active)
             ->when($category, function ($query, $category) {
@@ -33,8 +34,13 @@ class ListProductsAction
             })
             ->when($maxPrice !== null, function ($query) use ($maxPrice) {
                 $query->where("price_cents", "<=", $maxPrice);
-            })
-            ->latest()
-            ->paginate(15);
+            });
+        match ($sort) {
+            "price_asc" => $query->orderBy("price_cents", "asc"),
+            "price_desc" => $query->orderBy("price_cents", "desc"),
+            default => $query->latest(),
+        };
+
+        return $query->paginate(15);
     }
 }

@@ -201,3 +201,41 @@ it("filters products by price range", function () {
         ->assertJsonCount(1, "data")
         ->assertJsonPath("data.0.id", $matchingProduct->id);
 });
+
+it("sorts products by lowest price", function () {
+    $lowestProduct = Product::factory()->create([
+        "price_cents" => 900,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 5000,
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?sort=price_asc");
+
+    $response
+        ->assertOk()
+        ->assertJsonPath("data.0.id", $lowestProduct->id)
+        ->assertJsonPath("data.0.price_cents", 900);
+});
+
+it("sorts products by highest price", function () {
+    $highestProduct = Product::factory()->create([
+        "price_cents" => 5000,
+        "status" => ProductStatus::Active,
+    ]);
+
+    Product::factory()->create([
+        "price_cents" => 900,
+        "status" => ProductStatus::Active,
+    ]);
+
+    $response = $this->getJson("/api/products?sort=price_desc");
+
+    $response
+        ->assertOk()
+        ->assertJsonPath("data.0.id", $highestProduct->id)
+        ->assertJsonPath("data.0.price_cents", 5000);
+});
