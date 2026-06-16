@@ -6,7 +6,8 @@ erDiagram
  USERS ||--o{ PRODUCTS : owns
  USERS ||--o{ ORDERS : places
  USERS ||--|| CARTS : has
- USERS }o--o{ ROLES : has
+ USERS ||--o{ MODEL_HAS_ROLES : assigned
+ ROLES ||--o{ MODEL_HAS_ROLES : assigned_to
 
  CATEGORIES ||--o{ PRODUCTS : contains
 

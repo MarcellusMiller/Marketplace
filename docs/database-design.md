@@ -3,9 +3,9 @@
 
 ## 1. Visão Geral
 
-Este documento define a modelagem Inicial do banco de dados da plataforma de marketplace.
+Este documento define a modelagem inicial do banco de dados da plataforma de marketplace.
 
-O sistema será baseado em usuários com múltiolas roles, produtos pertencentes a vendedores, carrinho, pedidos, pagamentos, envio, conversas em tempo real, avaliações.
+O sistema será baseado em usuários com múltiplas roles, produtos pertencentes a vendedores, carrinho, pedidos, pagamentos, envio, conversas em tempo real e avaliações.
 
 --------------------------------
 
@@ -34,13 +34,13 @@ User has many Products
 User has many Orders
 User has one Cart
 User has many Reviews
-User belongs to many Roles
+User belongs to many Roles via Spatie Permission
 
 ------------------------------------
 
-### Role
+### roles
 
-roles Representa as roles disponíveis no sistema.
+Representa as roles disponíveis no sistema, gerenciadas pelo Spatie Permission.
 
 Exemplos:
 
@@ -51,36 +51,34 @@ admin
 ```
 
 
-Campos:
+Campos principais:
 
 ````
 id 
 name
+guard_name
 created_at
 updated_at
 ````
 
 ---------------------------------------------------------------------
 
-### role_user
+### model_has_roles
 
-Tabela pivô entre users e roles.
+Tabela polimórfica do Spatie Permission que associa models às roles.
 
-Campos:
+Campos principais:
 
 ```
-id
-user_id
 role_id
-created_at
-updated_at
-
+model_type
+model_id
 ```
 
 Relacionamentos:
 
-User belongs to many Roles  
-Role belongs to many Users
+User belongs to many Roles via model_has_roles
+Role belongs to many Users via model_has_roles
 
 ----------------
 
@@ -116,7 +114,7 @@ category_id
 name
 slug
 description
-price
+price_cents
 stock
 status
 created_at
@@ -133,7 +131,7 @@ disabled
 
 Relacionamentos:
 
-Porduct belongs to User as Seller
+Product belongs to User as Seller
 Product belongs to Category
 Product has many OrderItems
 Product has many CartItems
@@ -194,7 +192,7 @@ id
 cart_id  
 product_id  
 quantity  
-unit_price  
+unit_price_cents  
 created_at  
 updated_at
 ```
@@ -216,9 +214,9 @@ Campos:
 id
 buyer_id
 status
-subtotal
-shipping_total
-total
+subtotal_cents
+shipping_total_cents
+total_cents
 created_at
 updated_at
 ```
@@ -244,7 +242,7 @@ Order has one Shipment
 
 ### Order_items
 
-Representa os produtos dentro de um perdido.
+Representa os produtos dentro de um pedido.
 
 Campos: 
 
@@ -254,8 +252,8 @@ order_id
 product_id
 seller_id
 quantity
-unit_price
-total
+unit_price_cents
+total_cents
 created_at
 updated_at
 ```
@@ -287,7 +285,7 @@ order_id
 provider
 provider_payment_id
 status
-amount
+amount_cents
 paid_at
 created_at
 updated_at
@@ -327,7 +325,7 @@ Campos:
 id
 order_id
 status
-shipping_cost
+shipping_cost_cents
 tracking_code
 estimated_delivery_date
 shipped_at
@@ -448,7 +446,7 @@ Rating deve estar entre 1 e 5.
 
 
 ```
-User N:N Role
+User N:N Role via Spatie Permission
 
 User 1:N Product
 Category 1:N Product
@@ -483,9 +481,9 @@ Order 1:N Review
 
 Um usuário pode ser comprador e vendedor ao mesmo tempo.
 
-Por isso, foi escolhida uma tabela pivô:
+Por isso, será usado o relacionamento de roles do Spatie Permission:
 
-`role_user`
+`model_has_roles`
 
 ------------------
 
@@ -518,9 +516,9 @@ Mas no momento da criação do pedido, o preço final e confiável será salvo e
 
 Pagamento fica em tabela própria para manter o sistema organizado.
 
-Isso facilita intagração com gateways como:
+Isso facilita integração com gateways como:
 
-`Stripe Mercado pago ou Fake Gateway`
+`Stripe, Mercado Pago ou Fake Gateway`
 
 -----------------------
 
@@ -542,7 +540,7 @@ Como decidimos que mensagens só acontecem após interação comercial, a conver
 Possíveis tabelas para versões futuras:
 
 ```
-adresses
+addresses
 coupons
 refunds
 notifications
