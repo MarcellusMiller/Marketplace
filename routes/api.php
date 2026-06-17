@@ -14,6 +14,7 @@ Route::post("login", [LoginController::class, "store"]);
 Route::middleware("auth:sanctum")->group(function () {
     Route::post("logout", [LogoutController::class, "destroy"]);
     Route::get("me", [MeController::class, "show"]);
+    Route::post("products", [ProductController::class, "store"]);
 });
 
 Route::get("products", [ProductController::class, "index"]);

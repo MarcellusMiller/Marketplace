@@ -9,6 +9,8 @@ use App\Http\Resources\ProductDetailResource;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Actions\Products\CreateProductAction;
+use App\Http\Requests\Api\Products\StoreProductRequest;
 
 class ProductController extends Controller
 {
@@ -30,5 +32,16 @@ class ProductController extends Controller
         $product = $action->execute($product);
 
         return new ProductDetailResource($product);
+    }
+    public function store(StoreProductRequest $request, CreateProductAction $action) 
+    {
+        $product = $action->execute(
+            seller: $request->user(),
+            data: $request->validated(),
+        );
+
+        return (new ProductDetailResource($product))
+            ->response()
+            ->setStatusCode(201);
     }
 }
