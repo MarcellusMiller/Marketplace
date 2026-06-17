@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-BeforeEach(function () {
+beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });
 
