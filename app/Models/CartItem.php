@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     "cart_id",
     "product_id",
     "quantity",
-    "unit_price_cents"
+    "unit_price_cents",
 ])]
 class CartItem extends Model
 {

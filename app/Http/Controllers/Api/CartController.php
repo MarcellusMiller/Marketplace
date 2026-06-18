@@ -9,6 +9,7 @@ use App\Actions\Cart\AddCartItemAction;
 use App\Http\Requests\Api\Cart\AddCartItemRequest;
 use App\Actions\Cart\UpdateCartItemAction;
 use App\Http\Requests\Api\Cart\UpdateCartItemRequest;
+use App\Actions\Cart\RemoveCartItemAction;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 
@@ -43,6 +44,19 @@ class CartController extends Controller
             cartItem: $cartItem,
             data: $request->validated(),
         );
+
+        return (new CartResource($cart))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function removeItem(CartItem $cartItem, RemoveCartItemAction $action)
+    {
+        if($cartItem->cart?->user_id !== request()->user()?->id) {
+            abort(403);
+        }
+
+        $cart = $action->execute($cartItem);
 
         return (new CartResource($cart))
             ->response()
