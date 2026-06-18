@@ -1,14 +1,17 @@
 <?php
 
 use App\Enums\ProductStatus;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
-use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use function Pest\Laravel\getJson;
 
 uses(RefreshDatabase::class);
 
 it("lists active products with pagination data", function () {
+    /** @var Product $activeProduct */
     $activeProduct = Product::factory()->create([
         "name" => "Test Product",
         "slug" => "test-product",
@@ -29,7 +32,7 @@ it("lists active products with pagination data", function () {
         "status" => ProductStatus::Inactive,
     ]);
 
-    $response = $this->getJson("/api/products");
+    $response = getJson("/api/products");
 
     $response
         ->assertOk()
@@ -65,16 +68,19 @@ it("lists active products with pagination data", function () {
 });
 
 it("filters products by category", function () {
+    /** @var Category $categoryA */
     $categoryA = Category::factory()->create([
         "name" => "Category A",
         "slug" => "category-a",
     ]);
 
+    /** @var Category $categoryB */
     $categoryB = Category::factory()->create([
         "name" => "Category B",
         "slug" => "category-b",
     ]);
 
+    /** @var Product $productA */
     $productA = Product::factory()->create([
         "name" => "Product A",
         "slug" => "product-a",
@@ -89,7 +95,7 @@ it("filters products by category", function () {
         "category_id" => $categoryB->id,
     ]);
 
-    $response = $this->getJson("/api/products?category=category-a");
+    $response = getJson("/api/products?category=category-a");
 
     $response
         ->assertOk()
@@ -99,6 +105,7 @@ it("filters products by category", function () {
 });
 
 it("filters products by search term", function () {
+    /** @var Product $matchingProduct */
     $matchingProduct = Product::factory()->create([
         "name" => "Notebook Gamer",
         "description" => "High performance product",
@@ -111,7 +118,7 @@ it("filters products by search term", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?search=notebook");
+    $response = getJson("/api/products?search=notebook");
 
     $response
         ->assertOk()
@@ -120,6 +127,7 @@ it("filters products by search term", function () {
 });
 
 it("filters products by description search term", function () {
+    /** @var Product $matchingProduct */
     $matchingProduct = Product::factory()->create([
         "name" => "Generic Product",
         "description" => "Contains the word ergonomic",
@@ -132,7 +140,7 @@ it("filters products by description search term", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?search=ergonomic");
+    $response = getJson("/api/products?search=ergonomic");
 
     $response
         ->assertOk()
@@ -141,6 +149,7 @@ it("filters products by description search term", function () {
 });
 
 it("filters products by minimum price", function () {
+    /** @var Product $matchingProduct */
     $matchingProduct = Product::factory()->create([
         "price_cents" => 5000,
         "status" => ProductStatus::Active,
@@ -151,7 +160,7 @@ it("filters products by minimum price", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?min_price=1000");
+    $response = getJson("/api/products?min_price=1000");
 
     $response
         ->assertOk()
@@ -160,6 +169,7 @@ it("filters products by minimum price", function () {
 });
 
 it("filters products by maximum price", function () {
+    /** @var Product $matchingProduct */
     $matchingProduct = Product::factory()->create([
         "price_cents" => 900,
         "status" => ProductStatus::Active,
@@ -170,7 +180,7 @@ it("filters products by maximum price", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?max_price=1000");
+    $response = getJson("/api/products?max_price=1000");
 
     $response
         ->assertOk()
@@ -179,6 +189,7 @@ it("filters products by maximum price", function () {
 });
 
 it("filters products by price range", function () {
+    /** @var Product $matchingProduct */
     $matchingProduct = Product::factory()->create([
         "price_cents" => 2500,
         "status" => ProductStatus::Active,
@@ -194,7 +205,7 @@ it("filters products by price range", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?min_price=1000&max_price=3000");
+    $response = getJson("/api/products?min_price=1000&max_price=3000");
 
     $response
         ->assertOk()
@@ -203,6 +214,7 @@ it("filters products by price range", function () {
 });
 
 it("sorts products by lowest price", function () {
+    /** @var Product $lowestProduct */
     $lowestProduct = Product::factory()->create([
         "price_cents" => 900,
         "status" => ProductStatus::Active,
@@ -213,7 +225,7 @@ it("sorts products by lowest price", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?sort=price_asc");
+    $response = getJson("/api/products?sort=price_asc");
 
     $response
         ->assertOk()
@@ -222,6 +234,7 @@ it("sorts products by lowest price", function () {
 });
 
 it("sorts products by highest price", function () {
+    /** @var Product $highestProduct */
     $highestProduct = Product::factory()->create([
         "price_cents" => 5000,
         "status" => ProductStatus::Active,
@@ -232,7 +245,7 @@ it("sorts products by highest price", function () {
         "status" => ProductStatus::Active,
     ]);
 
-    $response = $this->getJson("/api/products?sort=price_desc");
+    $response = getJson("/api/products?sort=price_desc");
 
     $response
         ->assertOk()

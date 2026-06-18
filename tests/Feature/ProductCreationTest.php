@@ -6,28 +6,35 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\postJson;
+use function Pest\Laravel\seed;
+
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(RoleSeeder::class);
+    seed(RoleSeeder::class);
 });
 
 it("allows sellers to create products", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
+    /** @var Category $category */
     $category = Category::factory()->create();
 
-    $response = $this
-        ->actingAs($seller)
-        ->postJson("/api/products", [
-            "category_id" => $category->id,
-            "name" => "Mechanical Keyboard",
-            "description" => "A compact mechanical keyboard.",
-            "price_cents" => 25990,
-            "stock" => 10,
-            "status" => ProductStatus::Active->value,
-        ]);
+    actingAs($seller);
+
+    $response = postJson("/api/products", [
+        "category_id" => $category->id,
+        "name" => "Mechanical Keyboard",
+        "description" => "A compact mechanical keyboard.",
+        "price_cents" => 25990,
+        "stock" => 10,
+        "status" => ProductStatus::Active->value,
+    ]);
 
     $response
         ->assertCreated()
@@ -38,7 +45,7 @@ it("allows sellers to create products", function () {
         ->assertJsonPath("data.category.id", $category->id)
         ->assertJsonPath("data.seller.id", $seller->id);
 
-    $this->assertDatabaseHas("products", [
+    assertDatabaseHas("products", [
         "seller_id" => $seller->id,
         "category_id" => $category->id,
         "name" => "Mechanical Keyboard",
@@ -50,29 +57,32 @@ it("allows sellers to create products", function () {
 });
 
 it("prevents buyers from creating products", function () {
+    /** @var User $buyer */
     $buyer = User::factory()->create();
     $buyer->assignRole("buyer");
 
+    /** @var Category $category */
     $category = Category::factory()->create();
 
-    $response = $this
-        ->actingAs($buyer)
-        ->postJson("/api/products", [
-            "category_id" => $category->id,
-            "name" => "Mechanical Keyboard",
-            "description" => "A compact mechanical keyboard.",
-            "price_cents" => 25990,
-            "stock" => 10,
-            "status" => ProductStatus::Active->value,
-        ]);
+    actingAs($buyer);
+
+    $response = postJson("/api/products", [
+        "category_id" => $category->id,
+        "name" => "Mechanical Keyboard",
+        "description" => "A compact mechanical keyboard.",
+        "price_cents" => 25990,
+        "stock" => 10,
+        "status" => ProductStatus::Active->value,
+    ]);
 
     $response->assertForbidden();
 });
 
 it("prevents guests from creating products", function () {
+    /** @var Category $category */
     $category = Category::factory()->create();
 
-    $response = $this->postJson("/api/products", [
+    $response = postJson("/api/products", [
         "category_id" => $category->id,
         "name" => "Mechanical Keyboard",
         "description" => "A compact mechanical keyboard.",
@@ -85,12 +95,13 @@ it("prevents guests from creating products", function () {
 });
 
 it("validates required product fields", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
-    $response = $this
-        ->actingAs($seller)
-        ->postJson("/api/products", []);
+    actingAs($seller);
+
+    $response = postJson("/api/products", []);
 
     $response
         ->assertUnprocessable()

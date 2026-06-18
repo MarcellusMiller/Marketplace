@@ -7,32 +7,40 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\patchJson;
+use function Pest\Laravel\seed;
+
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(RoleSeeder::class);
+    seed(RoleSeeder::class);
 });
 
 it("allows sellers to update their own products", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
+    /** @var Category $category */
     $category = Category::factory()->create();
 
+    /** @var Product $product */
     $product = Product::factory()
         ->for($seller, "seller")
         ->create();
 
-    $response = $this
-        ->actingAs($seller)
-        ->patchJson("/api/products/{$product->id}", [
-            "category_id" => $category->id,
-            "name" => "Updated Product",
-            "description" => "Updated description.",
-            "price_cents" => 3990,
-            "stock" => 7,
-            "status" => ProductStatus::Inactive->value,
-        ]);
+    actingAs($seller);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "category_id" => $category->id,
+        "name" => "Updated Product",
+        "description" => "Updated description.",
+        "price_cents" => 3990,
+        "stock" => 7,
+        "status" => ProductStatus::Inactive->value,
+    ]);
 
     $response
         ->assertOk()
@@ -44,7 +52,7 @@ it("allows sellers to update their own products", function () {
         ->assertJsonPath("data.status", "inactive")
         ->assertJsonPath("data.category.id", $category->id);
 
-    $this->assertDatabaseHas("products", [
+    assertDatabaseHas("products", [
         "id" => $product->id,
         "seller_id" => $seller->id,
         "category_id" => $category->id,
@@ -57,9 +65,11 @@ it("allows sellers to update their own products", function () {
 });
 
 it("allows sellers to partially update their own products", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
+    /** @var Product $product */
     $product = Product::factory()
         ->for($seller, "seller")
         ->create([
@@ -68,11 +78,11 @@ it("allows sellers to partially update their own products", function () {
             "price_cents" => 1000,
         ]);
 
-    $response = $this
-        ->actingAs($seller)
-        ->patchJson("/api/products/{$product->id}", [
-            "price_cents" => 1500,
-        ]);
+    actingAs($seller);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "price_cents" => 1500,
+    ]);
 
     $response
         ->assertOk()
@@ -80,7 +90,7 @@ it("allows sellers to partially update their own products", function () {
         ->assertJsonPath("data.slug", "original-product")
         ->assertJsonPath("data.price_cents", 1500);
 
-    $this->assertDatabaseHas("products", [
+    assertDatabaseHas("products", [
         "id" => $product->id,
         "name" => "Original Product",
         "slug" => "original-product",
@@ -89,36 +99,41 @@ it("allows sellers to partially update their own products", function () {
 });
 
 it("prevents sellers from updating another seller products", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
+    /** @var User $anotherSeller */
     $anotherSeller = User::factory()->create();
     $anotherSeller->assignRole("seller");
 
+    /** @var Product $product */
     $product = Product::factory()
         ->for($anotherSeller, "seller")
         ->create();
 
-    $response = $this
-        ->actingAs($seller)
-        ->patchJson("/api/products/{$product->id}", [
-            "name" => "Forbidden Update",
-        ]);
+    actingAs($seller);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "name" => "Forbidden Update",
+    ]);
 
     $response->assertForbidden();
 });
 
 it("allows admins to update any product", function () {
+    /** @var User $admin */
     $admin = User::factory()->create();
     $admin->assignRole("admin");
 
+    /** @var Product $product */
     $product = Product::factory()->create();
 
-    $response = $this
-        ->actingAs($admin)
-        ->patchJson("/api/products/{$product->id}", [
-            "name" => "Admin Updated Product",
-        ]);
+    actingAs($admin);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "name" => "Admin Updated Product",
+    ]);
 
     $response
         ->assertOk()
@@ -127,24 +142,27 @@ it("allows admins to update any product", function () {
 });
 
 it("prevents buyers from updating products", function () {
+    /** @var User $buyer */
     $buyer = User::factory()->create();
     $buyer->assignRole("buyer");
 
+    /** @var Product $product */
     $product = Product::factory()->create();
 
-    $response = $this
-        ->actingAs($buyer)
-        ->patchJson("/api/products/{$product->id}", [
-            "name" => "Buyer Update",
-        ]);
+    actingAs($buyer);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "name" => "Buyer Update",
+    ]);
 
     $response->assertForbidden();
 });
 
 it("prevents guests from updating products", function () {
+    /** @var Product $product */
     $product = Product::factory()->create();
 
-    $response = $this->patchJson("/api/products/{$product->id}", [
+    $response = patchJson("/api/products/{$product->id}", [
         "name" => "Guest Update",
     ]);
 
@@ -152,20 +170,22 @@ it("prevents guests from updating products", function () {
 });
 
 it("validates update product fields", function () {
+    /** @var User $seller */
     $seller = User::factory()->create();
     $seller->assignRole("seller");
 
+    /** @var Product $product */
     $product = Product::factory()
         ->for($seller, "seller")
         ->create();
 
-    $response = $this
-        ->actingAs($seller)
-        ->patchJson("/api/products/{$product->id}", [
-            "price_cents" => 0,
-            "stock" => -1,
-            "status" => "invalid-status",
-        ]);
+    actingAs($seller);
+
+    $response = patchJson("/api/products/{$product->id}", [
+        "price_cents" => 0,
+        "stock" => -1,
+        "status" => "invalid-status",
+    ]);
 
     $response
         ->assertUnprocessable()

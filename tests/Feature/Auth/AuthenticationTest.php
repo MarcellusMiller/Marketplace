@@ -4,22 +4,27 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use function Pest\Laravel\assertDatabaseMissing;
+use function Pest\Laravel\getJson;
+use function Pest\Laravel\postJson;
+use function Pest\Laravel\seed;
+use function Pest\Laravel\withHeaders;
+
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(RoleSeeder::class);
+    seed(RoleSeeder::class);
 });
 
-// Test for user registration
 it("register as new User", function () {
-    $response = $this->postJson("/api/register", [
+    $response = postJson("/api/register", [
         "name" => "Marcellus test",
         "email" => "marcellus@test.com",
         "password" => "password123",
-        "password_confirmation" => "password123"
+        "password_confirmation" => "password123",
     ]);
 
-    $response 
+    $response
         ->assertCreated()
         ->assertJsonStructure([
             "message",
@@ -32,15 +37,17 @@ it("register as new User", function () {
         ]);
 });
 
-// Test to ensure that the buyer role is assigned upon registration
 it("assings buyer role when registering", function () {
-    $response = $this->postJson("/api/register", [
+    $response = postJson("/api/register", [
         "name" => "Marcellus test",
         "email" => "buyer@example.com",
         "password" => "password123",
-        "password_confirmation" => "password123"
+        "password_confirmation" => "password123",
     ]);
+
     $response->assertCreated();
+
+    /** @var User|null $user */
     $user = User::where("email", "buyer@example.com")->first();
 
     expect($user)->not->toBeNull();
@@ -48,19 +55,20 @@ it("assings buyer role when registering", function () {
 });
 
 it("logs in an existing user", function () {
+    /** @var User $user */
     $user = User::factory()->create([
-        "email" => "login@example.com",
-        "password" => "password123"
-    ]);
-
-    $user->assignRole("buyer");
-
-    $response  = $this->postJson("/api/login", [
         "email" => "login@example.com",
         "password" => "password123",
     ]);
 
-    $response 
+    $user->assignRole("buyer");
+
+    $response = postJson("/api/login", [
+        "email" => "login@example.com",
+        "password" => "password123",
+    ]);
+
+    $response
         ->assertOk()
         ->assertJsonStructure([
             "message",
@@ -72,12 +80,12 @@ it("logs in an existing user", function () {
 it("rejects login with invalid credentials", function () {
     User::factory()->create([
         "email" => "wrong-password@example.com",
-        "password" => "password123"
+        "password" => "password123",
     ]);
 
-    $response = $this->postJson("/api/login", [
+    $response = postJson("/api/login", [
         "email" => "wrong-password@example.com",
-        "password" => "wrongpassword"
+        "password" => "wrongpassword",
     ]);
 
     $response->assertUnauthorized()
@@ -87,6 +95,7 @@ it("rejects login with invalid credentials", function () {
 });
 
 it("returns the authenticated user", function () {
+    /** @var User $user */
     $user = User::factory()->create([
         "email" => "me@example.com",
     ]);
@@ -94,12 +103,11 @@ it("returns the authenticated user", function () {
     $user->assignRole("buyer");
     $token = $user->createToken("auth_token")->plainTextToken;
 
-    $response = $this
-        ->withHeaders([
-            "Authorization" => "Bearer {$token}",
-        ])
-        ->getJson("/api/me");
-    $response 
+    $response = withHeaders([
+        "Authorization" => "Bearer {$token}",
+    ])->getJson("/api/me");
+
+    $response
         ->assertOk()
         ->assertJson([
             "user" => [
@@ -108,29 +116,28 @@ it("returns the authenticated user", function () {
                 "email" => $user->email,
                 "avatar_url" => $user->avatar_url,
             ],
-            "roles" => ["buyer"], 
-            ]);
+            "roles" => ["buyer"],
+        ]);
 });
 
 it("does not return authenticated user without token", function () {
-    $response = $this->getJson("/api/me");
+    $response = getJson("/api/me");
 
     $response->assertUnauthorized();
 });
 
 it("logs out the authenticated user", function () {
+    /** @var User $user */
     $user = User::factory()->create([
-        "email" => "logout@example.com"
+        "email" => "logout@example.com",
     ]);
 
     $user->assignRole("buyer");
     $token = $user->createToken("auth_token")->plainTextToken;
 
-    $response = $this
-        ->withHeaders([
-            "Authorization" => "Bearer {$token}",
-        ])
-        ->postJson("/api/logout");
+    $response = withHeaders([
+        "Authorization" => "Bearer {$token}",
+    ])->postJson("/api/logout");
 
     $response
         ->assertOk()
@@ -138,9 +145,7 @@ it("logs out the authenticated user", function () {
             "message" => "Logged out successfully",
         ]);
 
-    $this->assertDatabaseMissing("personal_access_tokens", [
+    assertDatabaseMissing("personal_access_tokens", [
         "tokenable_id" => $user->id,
-
     ]);
-
 });

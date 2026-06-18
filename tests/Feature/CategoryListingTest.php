@@ -3,20 +3,24 @@
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use function Pest\Laravel\getJson;
+
 uses(RefreshDatabase::class);
 
 it("lists public categories ordered by name", function () {
+    /** @var Category $books */
     $books = Category::factory()->create([
         "name" => "Books",
         "slug" => "books",
     ]);
 
+    /** @var Category $electronics */
     $electronics = Category::factory()->create([
         "name" => "Electronics",
         "slug" => "electronics",
     ]);
 
-    $response = $this->getJson("/api/categories");
+    $response = getJson("/api/categories");
 
     $response
         ->assertOk()

@@ -5,9 +5,12 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use function Pest\Laravel\getJson;
+
 uses(RefreshDatabase::class);
 
 it("retrieves a product active for slug", function () {
+    /** @var Product $product */
     $product = Product::factory()->create([
         "name" => "Test Product",
         "slug" => "test-product",
@@ -24,7 +27,7 @@ it("retrieves a product active for slug", function () {
             "url" => "https://example.com/products/test-product.jpg",
         ]);
 
-    $response = $this->getJson("/api/products/{$product->slug}");
+    $response = getJson("/api/products/{$product->slug}");
 
     $response
         ->assertOk()
@@ -61,6 +64,7 @@ it("retrieves a product active for slug", function () {
 });
 
 it("returns images for product details", function () {
+    /** @var Product $product */
     $product = Product::factory()->create([
         "name" => "Test Product",
         "slug" => "test-product",
@@ -84,7 +88,7 @@ it("returns images for product details", function () {
             "is_main" => false,
         ]);
 
-    $response = $this->getJson("/api/products/{$product->slug}");
+    $response = getJson("/api/products/{$product->slug}");
 
     $response
         ->assertOk()
@@ -94,6 +98,7 @@ it("returns images for product details", function () {
 });
 
 it("returns 404 for inactive product", function () {
+    /** @var Product $product */
     $product = Product::factory()->create([
         "name" => "Test Product",
         "slug" => "test-product",
@@ -103,13 +108,13 @@ it("returns 404 for inactive product", function () {
         "status" => ProductStatus::Inactive,
     ]);
 
-    $response = $this->getJson("/api/products/{$product->slug}");
+    $response = getJson("/api/products/{$product->slug}");
 
     $response->assertNotFound();
 });
 
 it("returns 404 for non-existing product", function () {
-    $response = $this->getJson("/api/products/non-existing-product");
+    $response = getJson("/api/products/non-existing-product");
 
     $response->assertNotFound();
 });
