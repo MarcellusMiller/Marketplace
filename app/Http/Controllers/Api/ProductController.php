@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Actions\Products\ListProductsAction;
 use App\Http\Resources\ProductResource;
 use App\Actions\Products\ListSingleProductAction;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 
 use App\Actions\Products\CreateProductAction;
 use App\Actions\Products\UpdateProductAction;
+use App\Actions\Products\DisableProductAction;
 
 use App\Http\Requests\Api\Products\UpdateProductRequest;
 use App\Http\Requests\Api\Products\StoreProductRequest;
@@ -58,6 +61,15 @@ class ProductController extends Controller
             product: $product,
             data: $request->validated(),
         );
+
+        return new ProductDetailResource($product);
+    }
+
+    public function destroy(Product $product, DisableProductAction $action)
+    {
+        Gate::authorize("delete", $product);
+
+        $product = $action->execute($product);
 
         return new ProductDetailResource($product);
     }
