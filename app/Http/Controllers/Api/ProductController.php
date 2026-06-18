@@ -9,7 +9,11 @@ use App\Http\Resources\ProductDetailResource;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+
 use App\Actions\Products\CreateProductAction;
+use App\Actions\Products\UpdateProductAction;
+
+use App\Http\Requests\Api\Products\UpdateProductRequest;
 use App\Http\Requests\Api\Products\StoreProductRequest;
 
 class ProductController extends Controller
@@ -43,5 +47,18 @@ class ProductController extends Controller
         return (new ProductDetailResource($product))
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function update(
+        UpdateProductRequest $request,
+        Product $product,
+        UpdateProductAction $action,
+    ) {
+        $product = $action->execute(
+            product: $product,
+            data: $request->validated(),
+        );
+
+        return new ProductDetailResource($product);
     }
 }
