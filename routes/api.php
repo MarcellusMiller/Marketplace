@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 
@@ -17,6 +19,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post("products", [ProductController::class, "store"]);
     Route::patch("products/{product}", [ProductController::class, "update"]);
     Route::delete("products/{product}", [ProductController::class, "destroy"]);
+    Route::get("cart", [CartController::class, "show"]);
 });
 
 Route::get("products", [ProductController::class, "index"]);
