@@ -19,7 +19,10 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post("products", [ProductController::class, "store"]);
     Route::patch("products/{product}", [ProductController::class, "update"]);
     Route::delete("products/{product}", [ProductController::class, "destroy"]);
+
     Route::get("cart", [CartController::class, "show"]);
+    Route::post("cart/items", [CartController::class, "addItem"]);
+    Route::patch("cart/items/{cartItem}", [CartController::class, "updateItem"]);
 });
 
 Route::get("products", [ProductController::class, "index"]);
