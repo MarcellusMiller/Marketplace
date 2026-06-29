@@ -147,3 +147,33 @@ it("validates required quantity", function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(["quantity"]);
 });
+
+it("does not decrease product stock when updating cart item quantity", function () {
+    /** @var User $user */
+    $user = User::factory()->create();
+
+    /** @var Cart $cart */
+    $cart = Cart::factory()->create([
+        "user_id" => $user->id,
+    ]);
+
+    /** @var Product $product */
+    $product = Product::factory()->create([
+        "stock" => 10,
+    ]);
+
+    /** @var CartItem $cartItem */
+    $cartItem = CartItem::factory()->create([
+        "cart_id" => $cart->id,
+        "product_id" => $product->id,
+        "quantity" => 2,
+    ]);
+
+    actingAs($user);
+
+    patchJson("/api/cart/items/{$cartItem->id}", [
+        "quantity" => 5,
+    ])->assertOk();
+
+    expect($product->refresh()->stock)->toBe(10);
+});

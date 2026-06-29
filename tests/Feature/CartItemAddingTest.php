@@ -168,3 +168,57 @@ it("validates required fields", function () {
             "quantity",
         ]);
 });
+
+it("prevents adding quantity when cart total would exceed product stock", function () {
+    /** @var User $user */
+    $user = User::factory()->create();
+
+    /** @var Cart $cart */
+    $cart = Cart::factory()->create([
+        "user_id" => $user->id,
+    ]);
+
+    /** @var Product $product */
+    $product = Product::factory()->create([
+        "stock" => 5,
+        "status" => ProductStatus::Active,
+    ]);
+
+    CartItem::factory()->create([
+        "cart_id" => $cart->id,
+        "product_id" => $product->id,
+        "quantity" => 3,
+        "unit_price_cents" => $product->price_cents,
+    ]);
+
+    actingAs($user);
+
+    $response = postJson("/api/cart/items", [
+        "product_id" => $product->id,
+        "quantity" => 3,
+    ]);
+
+    $response
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(["quantity"]);
+});
+
+it("does not decrease product stock when adding products to cart", function () {
+    /** @var User $user */
+    $user = User::factory()->create();
+
+    /** @var Product $product */
+    $product = Product::factory()->create([
+        "stock" => 10,
+        "status" => ProductStatus::Active,
+    ]);
+
+    actingAs($user);
+
+    postJson("/api/cart/items", [
+        "product_id" => $product->id,
+        "quantity" => 2,
+    ])->assertOk();
+
+    expect($product->refresh()->stock)->toBe(10);
+});
